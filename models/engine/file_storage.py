@@ -74,10 +74,9 @@ class FileStorage:
                     if class_name == 'BaseModel':
                         from models.base_model import BaseModel
                         FileStorage._FileStorage__objects[key] = BaseModel(**obj_dict)
-                    # Add more classes here as they are created
-                    # elif class_name == 'User':
-                    #     from models.user import User
-                    #     FileStorage._FileStorage__objects[key] = User(**obj_dict)
+                    elif class_name == 'User':
+                        from models.user import User
+                        FileStorage._FileStorage__objects[key] = User(**obj_dict)
             except (json.JSONDecodeError, KeyError, ImportError):
                 # If there's an error loading the file, start with empty objects
                 FileStorage._FileStorage__objects = {}

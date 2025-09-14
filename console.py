@@ -6,6 +6,7 @@ Command interpreter for the AirBnB clone project.
 import cmd
 import sys
 from models.base_model import BaseModel
+from models.user import User
 from models import storage
 
 
@@ -22,6 +23,22 @@ class HBNBCommand(cmd.Cmd):
         """
         return False
     
+    def get_class(self, class_name):
+        """
+        Get the class object from class name.
+        
+        Args:
+            class_name (str): Name of the class
+            
+        Returns:
+            class: The class object or None if not found
+        """
+        classes = {
+            'BaseModel': BaseModel,
+            'User': User
+        }
+        return classes.get(class_name)
+    
     def do_quit(self, arg):
         """
         Quit command to exit the program
@@ -37,7 +54,7 @@ class HBNBCommand(cmd.Cmd):
     
     def do_create(self, arg):
         """
-        Creates a new instance of BaseModel, saves it and prints the id.
+        Creates a new instance of a class, saves it and prints the id.
         Usage: create <class name>
         """
         if not arg:
@@ -45,11 +62,12 @@ class HBNBCommand(cmd.Cmd):
             return
         
         class_name = arg.strip()
-        if class_name != "BaseModel":
+        cls = self.get_class(class_name)
+        if cls is None:
             print("** class doesn't exist **")
             return
         
-        new_instance = BaseModel()
+        new_instance = cls()
         new_instance.save()
         print(new_instance.id)
     
@@ -64,7 +82,8 @@ class HBNBCommand(cmd.Cmd):
             return
         
         class_name = args[0]
-        if class_name != "BaseModel":
+        cls = self.get_class(class_name)
+        if cls is None:
             print("** class doesn't exist **")
             return
         
@@ -93,7 +112,8 @@ class HBNBCommand(cmd.Cmd):
             return
         
         class_name = args[0]
-        if class_name != "BaseModel":
+        cls = self.get_class(class_name)
+        if cls is None:
             print("** class doesn't exist **")
             return
         
@@ -121,7 +141,8 @@ class HBNBCommand(cmd.Cmd):
         
         if arg:
             class_name = arg.strip()
-            if class_name != "BaseModel":
+            cls = self.get_class(class_name)
+            if cls is None:
                 print("** class doesn't exist **")
                 return
             
@@ -147,7 +168,8 @@ class HBNBCommand(cmd.Cmd):
             return
         
         class_name = args[0]
-        if class_name != "BaseModel":
+        cls = self.get_class(class_name)
+        if cls is None:
             print("** class doesn't exist **")
             return
         
