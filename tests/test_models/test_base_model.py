@@ -7,8 +7,6 @@ to ensure all functionality works as expected.
 """
 
 import unittest
-import os
-import sys
 import json
 from datetime import datetime
 from models.base_model import BaseModel
@@ -253,6 +251,108 @@ class TestBaseModel(unittest.TestCase):
         self.assertNotEqual(model1.id, model2.id)
         self.assertNotEqual(model1.name, model2.name)
         self.assertNotEqual(model1.created_at, model2.created_at)
+    
+    def test_dict_reconstruction_with_class_key(self):
+        """
+        Test that __class__ key is properly ignored during reconstruction.
+        """
+        original_model = BaseModel()
+        original_model.name = "Test Model"
+        original_model.value = 42
+        
+        # Convert to dict and add __class__ key
+        model_dict = original_model.to_dict()
+        model_dict['__class__'] = 'SomeOtherClass'
+        
+        # Reconstruct from dict
+        new_model = BaseModel(**model_dict)
+        
+        # Check that __class__ was ignored
+        self.assertEqual(new_model.__class__.__name__, 'BaseModel')
+        self.assertNotEqual(new_model.__class__.__name__, 'SomeOtherClass')
+        self.assertEqual(new_model.name, "Test Model")
+        self.assertEqual(new_model.value, 42)
+    
+    def test_dict_reconstruction_datetime_conversion(self):
+        """
+        Test that datetime strings are properly converted back to datetime objects.
+        """
+        original_model = BaseModel()
+        original_model.name = "DateTime Test"
+        
+        # Convert to dict
+        model_dict = original_model.to_dict()
+        
+        # Verify datetime fields are strings in dict
+        self.assertIsInstance(model_dict['created_at'], str)
+        self.assertIsInstance(model_dict['updated_at'], str)
+        
+        # Reconstruct from dict
+        new_model = BaseModel(**model_dict)
+        
+        # Verify datetime fields are datetime objects in new model
+        self.assertIsInstance(new_model.created_at, datetime)
+        self.assertIsInstance(new_model.updated_at, datetime)
+        
+        # Verify they match the original
+        self.assertEqual(new_model.created_at, original_model.created_at)
+        self.assertEqual(new_model.updated_at, original_model.updated_at)
+    
+    def test_dict_reconstruction_preserves_all_attributes(self):
+        """
+        Test that all attributes are preserved during dictionary reconstruction.
+        """
+        original_model = BaseModel()
+        original_model.name = "Attribute Test"
+        original_model.number = 123
+        original_model.boolean = True
+        original_model.list_attr = [1, 2, 3]
+        original_model.dict_attr = {'key': 'value'}
+        
+        # Convert to dict and back
+        model_dict = original_model.to_dict()
+        new_model = BaseModel(**model_dict)
+        
+        # Check all attributes are preserved
+        self.assertEqual(new_model.name, "Attribute Test")
+        self.assertEqual(new_model.number, 123)
+        self.assertEqual(new_model.boolean, True)
+        self.assertEqual(new_model.list_attr, [1, 2, 3])
+        self.assertEqual(new_model.dict_attr, {'key': 'value'})
+        self.assertEqual(new_model.id, original_model.id)
+        self.assertEqual(new_model.created_at, original_model.created_at)
+        self.assertEqual(new_model.updated_at, original_model.updated_at)
+    
+    def test_dict_reconstruction_creates_different_instance(self):
+        """
+        Test that reconstruction creates a different instance (not the same object).
+        """
+        original_model = BaseModel()
+        original_model.name = "Instance Test"
+        
+        # Convert to dict and back
+        model_dict = original_model.to_dict()
+        new_model = BaseModel(**model_dict)
+        
+        # Should be different instances
+        self.assertIsNot(original_model, new_model)
+        self.assertFalse(original_model is new_model)
+        
+        # But should have same attributes
+        self.assertEqual(original_model.id, new_model.id)
+        self.assertEqual(original_model.name, new_model.name)
+    
+    def test_dict_reconstruction_with_empty_kwargs(self):
+        """
+        Test that reconstruction with empty kwargs creates new instance.
+        """
+        # Create with empty kwargs
+        model = BaseModel(**{})
+        
+        # Should have new id and timestamps
+        self.assertIsInstance(model.id, str)
+        self.assertIsInstance(model.created_at, datetime)
+        self.assertIsInstance(model.updated_at, datetime)
     
     def test_save_preserves_other_attributes(self):
         """
