@@ -16,8 +16,12 @@ class FileStorage:
     deserializes JSON file to instances.
     """
     
-    __file_path = "file.json"
-    __objects = {}
+    def __init__(self):
+        """
+        Initialize FileStorage instance.
+        """
+        self.__file_path = "file.json"
+        self.__objects = {}
     
     def all(self):
         """
@@ -26,7 +30,7 @@ class FileStorage:
         Returns:
             dict: Dictionary containing all stored objects
         """
-        return FileStorage.__objects
+        return self.__objects
     
     def new(self, obj):
         """
@@ -36,17 +40,17 @@ class FileStorage:
             obj: Object to store
         """
         key = "{}.{}".format(obj.__class__.__name__, obj.id)
-        FileStorage.__objects[key] = obj
+        self.__objects[key] = obj
     
     def save(self):
         """
         Serialize __objects to the JSON file (path: __file_path).
         """
         objects_dict = {}
-        for key, obj in FileStorage.__objects.items():
+        for key, obj in self.__objects.items():
             objects_dict[key] = obj.to_dict()
         
-        with open(FileStorage.__file_path, 'w', encoding='utf-8') as f:
+        with open(self.__file_path, 'w', encoding='utf-8') as f:
             json.dump(objects_dict, f)
     
     def reload(self):
@@ -55,9 +59,9 @@ class FileStorage:
         (__file_path) exists; otherwise, do nothing. If the file doesn't 
         exist, no exception should be raised).
         """
-        if os.path.exists(FileStorage.__file_path):
+        if os.path.exists(self.__file_path):
             try:
-                with open(FileStorage.__file_path, 'r', encoding='utf-8') as f:
+                with open(self.__file_path, 'r', encoding='utf-8') as f:
                     objects_dict = json.load(f)
                 
                 for key, obj_dict in objects_dict.items():
@@ -65,11 +69,11 @@ class FileStorage:
                     # Import the class dynamically
                     if class_name == 'BaseModel':
                         from models.base_model import BaseModel
-                        FileStorage.__objects[key] = BaseModel(**obj_dict)
+                        self.__objects[key] = BaseModel(**obj_dict)
                     # Add more classes here as they are created
                     # elif class_name == 'User':
                     #     from models.user import User
-                    #     FileStorage.__objects[key] = User(**obj_dict)
+                    #     self.__objects[key] = User(**obj_dict)
             except (json.JSONDecodeError, KeyError, ImportError):
                 # If there's an error loading the file, start with empty objects
-                FileStorage.__objects = {}
+                self.__objects = {}
