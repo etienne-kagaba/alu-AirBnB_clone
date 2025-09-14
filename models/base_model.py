@@ -8,6 +8,7 @@ attributes and methods for other classes in the AirBnB clone project.
 
 import uuid
 from datetime import datetime
+from models import storage
 
 
 class BaseModel:
@@ -34,6 +35,8 @@ class BaseModel:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
+            # Add new instance to storage
+            storage.new(self)
     
     def __str__(self):
         """
@@ -50,9 +53,11 @@ class BaseModel:
     
     def save(self):
         """
-        Update the public instance attribute updated_at with the current datetime.
+        Update the public instance attribute updated_at with the current datetime
+        and save the object to storage.
         """
         self.updated_at = datetime.now()
+        storage.save()
     
     def to_dict(self):
         """
